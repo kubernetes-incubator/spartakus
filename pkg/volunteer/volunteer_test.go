@@ -34,9 +34,18 @@ type fakeNodeLister struct {
 	returnError error
 }
 
+type fakeNamespaceLister struct {
+	returnValue report.NamespaceStats
+	returnError error
+}
+
 var _ nodeLister = fakeNodeLister{}
 
 func (fake fakeNodeLister) ListNodes() ([]report.Node, error) {
+	return fake.returnValue, fake.returnError
+}
+
+func (fake fakeNamespaceLister) ListNamespace() (report.NamespaceStats, error) {
 	return fake.returnValue, fake.returnError
 }
 
@@ -60,15 +69,17 @@ func newTestVolunteer(t *testing.T) *volunteer {
 	db := database.Database(nil)
 	nodes := &fakeNodeLister{}
 	vers := &fakeServerVersioner{}
-	return newVolunteer(log, fakeClusterID, fakePeriod, db, nodes, vers)
+	namespace := &fakeNamespaceLister{}
+	return newVolunteer(log, fakeClusterID, fakePeriod, db, nodes, namespace, vers)
 }
 
 func TestGenerateRecord(t *testing.T) {
 	testCases := []struct {
-		tweak   func(vol *volunteer)
-		errstr  string
-		version string
-		nodes   []string
+		tweak     func(vol *volunteer)
+		errstr    string
+		version   string
+		nodes     []string
+		namespace int
 	}{
 		{ // test serverVersioner failure
 			tweak: func(vol *volunteer) {
@@ -82,15 +93,25 @@ func TestGenerateRecord(t *testing.T) {
 			},
 			errstr: "fail",
 		},
+		{ // test namespaceLister failure
+			tweak: func(vol *volunteer) {
+				vol.namespaceLister.(*fakeNamespaceLister).returnError = fmt.Errorf("fail")
+			},
+			errstr: "fail",
+		},
 		{ // test success
 			tweak: func(vol *volunteer) {
 				vol.serverVersioner.(*fakeServerVersioner).returnValue = "v1.2.3"
+				vol.namespaceLister.(*fakeNamespaceLister).returnValue = report.NamespaceStats{
+					Total: 15,
+				}
 				vol.nodeLister.(*fakeNodeLister).returnValue = []report.Node{
 					{ID: "node1"}, {ID: "node2"},
 				}
 			},
-			version: "v1.2.3",
-			nodes:   []string{"node1", "node2"},
+			version:   "v1.2.3",
+			nodes:     []string{"node1", "node2"},
+			namespace: 15,
 		},
 	}
 
@@ -118,6 +139,9 @@ func TestGenerateRecord(t *testing.T) {
 			}
 			if len(rec.Nodes) != len(tc.nodes) {
 				t.Errorf("[%d] expected %d nodes, got %d", i, len(rec.Nodes), len(tc.nodes))
+			}
+			if rec.Namespace.Total != tc.namespace {
+				t.Errorf("[%d] unexpected number of namespaces to be %v, got %v ", i, rec.Namespace.Total, tc.namespace)
 			}
 			for j := range rec.Nodes {
 				if rec.Nodes[j].ID != tc.nodes[j] {

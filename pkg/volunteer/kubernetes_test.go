@@ -22,9 +22,40 @@ import (
 
 	"github.com/kubernetes-incubator/spartakus/pkg/report"
 	"github.com/kylelemons/godebug/pretty"
+	kclient "k8s.io/client-go/1.4/kubernetes"
 	kresource "k8s.io/client-go/1.4/pkg/api/resource"
 	kv1 "k8s.io/client-go/1.4/pkg/api/v1"
 )
+
+/*
+ ok we need we have two inputs and they need to be faked.
+*/
+
+type kubeClientWrapperForTesting struct {
+	client *kclient.Clientset
+}
+
+func TestNamespaceFromKubeNamespaces(t *testing.T) {
+	testCase := struct {
+		input  map[int][]float64
+		except report.NamespaceStats
+	}{
+		input: map[int][]float64{
+			Namespaces:  []float64{24},
+			Pods:        []float64{5, 8, 1, 78},
+			Deployments: []float64{7, 5, 453, 32},
+			Jobs:        []float64{0, 2, 0, 0},
+			CreationTS:  []float64{0.3, 12, 52},
+			Services:    []float64{4, 0, 10, 0, 9},
+		},
+		except: report.NamespaceStats{Total: 24, PodsAvg: 23, DeployAvg: 124.3, JobsAvg: 0.5, LifetimeAvg: 21.4, ServiceAvg: 4.6},
+	}
+
+	ns := namespaceFromKubeNamespaces(testCase.input)
+	if !reflect.DeepEqual(ns, testCase.except) {
+		t.Errorf("[%d]: did not get expected result:\n", pretty.Compare(ns, testCase.except))
+	}
+}
 
 func TestNodeFromKubeNode(t *testing.T) {
 	testCases := []struct {

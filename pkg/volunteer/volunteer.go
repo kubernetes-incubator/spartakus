@@ -31,7 +31,7 @@ func New(log logr.Logger, clusterID string, period time.Duration, db database.Da
 	if err != nil {
 		return nil, err
 	}
-	return newVolunteer(log, clusterID, period, db, kcw, kcw), nil
+	return newVolunteer(log, clusterID, period, db, kcw, kcw, kcw), nil
 }
 
 func newVolunteer(
@@ -40,6 +40,7 @@ func newVolunteer(
 	period time.Duration,
 	db database.Database,
 	nodeLister nodeLister,
+	namespaceLister namespaceLister,
 	serverVersioner serverVersioner) *volunteer {
 
 	return &volunteer{
@@ -48,6 +49,7 @@ func newVolunteer(
 		period:          period,
 		database:        db,
 		nodeLister:      nodeLister,
+		namespaceLister: namespaceLister,
 		serverVersioner: serverVersioner,
 	}
 }
@@ -58,6 +60,7 @@ type volunteer struct {
 	database        database.Database
 	log             logr.Logger
 	nodeLister      nodeLister
+	namespaceLister namespaceLister
 	serverVersioner serverVersioner
 }
 
@@ -101,12 +104,17 @@ func (v *volunteer) generateRecord() (report.Record, error) {
 	if err != nil {
 		return report.Record{}, err
 	}
+	namespace, err := v.namespaceLister.ListNamespace()
+	if err != nil {
+		return report.Record{}, err
+	}
 
 	rec := report.Record{
 		Version:       version.VERSION,
 		ClusterID:     v.clusterID,
 		MasterVersion: &svrVer,
 		Nodes:         nodes,
+		Namespace:     namespace,
 	}
 
 	return rec, nil

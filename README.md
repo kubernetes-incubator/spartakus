@@ -29,7 +29,9 @@ This project encompasses two things:
 Reports include a user-provided cluster identifier (we recommend a random
 UUID), the version strings of your kubernetes master, and some information
 about each node in the cluster, including OS version, kubelet version, docker
-version, and CPU and memory capacity.
+version, and CPU and memory capacity.  Total number of namespaces in a k8's 
+cluster. Average number of pods, jobs, services, deployments and average 
+lifetime per namespace. 
 
 To repeat from above: THIS DOES NOT REPORT ANY PERSONAL INFORMATION.  Anything
 that might be identifying, including things like IP addresses, container
@@ -41,66 +43,127 @@ An example of a report payload:
 
 ```json
 {
-    "version": "v1.0.0",
-    "timestamp": "867530909031976",
-    "clusterID": "2f9c93d3-156c-47aa-8802-578ffca9b50e",
-    "masterVersion": "v1.3.5",
-    "nodes": [
+  "version": "v1.0.0",
+  "timestamp": "867530909031976",
+  "clusterID": "2f9c93d3-156c-47aa-8802-578ffca9b50e",
+  "masterVersion": "v1.3.5",
+  "nodes": [
+    {
+      "id": "c8863d09ecc5be8d9791f72acd275fc2",
+      "operatingSystem": "linux",
+      "osImage": "Debian GNU/Linux 7 (wheezy)",
+      "kernelVersion": "3.16.0-4-amd64",
+      "architecture": "amd64",
+      "containerRuntimeVersion": "docker://1.11.2",
+      "kubeletVersion": "v1.3.2",
+      "capacity": [
         {
-            "id": "c8863d09ecc5be8d9791f72acd275fc2",
-            "operatingSystem": "linux",
-            "osImage": "Debian GNU/Linux 7 (wheezy)",
-            "kernelVersion": "3.16.0-4-amd64",
-            "architecture": "amd64",
-            "containerRuntimeVersion": "docker://1.11.2",
-            "kubeletVersion": "v1.3.2",
-            "capacity": [
-                {
-                    "resource": "alpha.kubernetes.io/nvidia-gpu",
-                    "value": "0"
-                },
-                {
-                    "resource": "cpu",
-                    "value": "4"
-                },
-                {
-                    "resource": "memory",
-                    "value": "15437428Ki"
-                },
-                {
-                    "resource": "pods",
-                    "value": "110"
-                }
-            ]
+          "resource": "alpha.kubernetes.io/nvidia-gpu",
+          "value": "0"
         },
         {
-            "id": "5b919a15947b0680277acddf68d4b7aa",
-            "operatingSystem": "linux",
-            "osImage": "Debian GNU/Linux 7 (wheezy)",
-            "kernelVersion": "3.16.0-4-amd64",
-            "architecture": "amd64",
-            "containerRuntimeVersion": "docker://1.11.2",
-            "kubeletVersion": "v1.3.2",
-            "capacity": [
-                {
-                    "resource": "alpha.kubernetes.io/nvidia-gpu",
-                    "value": "0"
-                },
-                {
-                    "resource": "cpu",
-                    "value": "4"
-                },
-                {
-                    "resource": "memory",
-                    "value": "15437428Ki"
-                },
-                {
-                    "resource": "pods",
-                    "value": "110"
-                }
-            ]
+          "resource": "cpu",
+          "value": "4"
+        },
+        {
+          "resource": "memory",
+          "value": "15437428Ki"
+        },
+        {
+          "resource": "pods",
+          "value": "110"
         }
-    ]
+      ]
+    },
+    {
+      "id": "5b919a15947b0680277acddf68d4b7aa",
+      "operatingSystem": "linux",
+      "osImage": "Debian GNU/Linux 7 (wheezy)",
+      "kernelVersion": "3.16.0-4-amd64",
+      "architecture": "amd64",
+      "containerRuntimeVersion": "docker://1.11.2",
+      "kubeletVersion": "v1.3.2",
+      "capacity": [
+        {
+          "resource": "alpha.kubernetes.io/nvidia-gpu",
+          "value": "0"
+        },
+        {
+          "resource": "cpu",
+          "value": "4"
+        },
+        {
+          "resource": "memory",
+          "value": "15437428Ki"
+        },
+        {
+          "resource": "pods",
+          "value": "110"
+        }
+      ]
+    }
+  ],
+  "namespaces": {
+    "count": 8,
+    "lifetime": {
+      "count": 180,
+      "avg": 141.2,
+      "min": 1,
+      "max": 180,
+      "histogram": [
+        {
+          "bucket": 1,
+          "cumulative_count": 45,
+          "lower_bound": 0,
+          "upper_bound": 5,
+          "percentage": 45
+        },
+        {
+          "bucket": 2,
+          "cumulative_count": 2,
+          "lower_bound": 5,
+          "upper_bound": 10,
+          "percentage": 15
+        },
+        {
+          "bucket": 3,
+          "cumulative_count": 23,
+          "lower_bound": 10,
+          "upper_bound": "inf",
+          "percentage": 19
+        }
+      ]
+    },
+    "pods": {
+      "count": 45,
+      "avg": 141.2,
+      "min": 1,
+      "max": 180,
+      "histogram": [
+        {
+          "bucket": 1,
+          "cumulative_count": 45,
+          "lower_bound": 0,
+          "upper_bound": 5,
+          "percentage": 34
+        },
+        {
+          "bucket": 2,
+          "cumulative_count": 2,
+          "lower_bound": 0,
+          "upper_bound": 10,
+          "percentage": 50
+        },
+        {
+          "bucket": 3,
+          "cumulative_count": 23,
+          "lower_bound": 0,
+          "upper_bound": "inf",
+          "percentage": 14
+        }
+      ]
+    }
+  }
 }
 ```
 

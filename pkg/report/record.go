@@ -32,6 +32,23 @@ type Record struct {
 	MasterVersion *string `json:"masterVersion,omitempty"`
 	// Nodes is a list of node-specific information from the reporting cluster.
 	Nodes []Node `json:"nodes,omitempty"`
+	// Namespace contains statistics regarding the k8s namespace objects
+	Namespace NamespaceStats `json:"namespaces,omitempty"`
+}
+
+type NamespaceStats struct {
+	// Total number of active namespaces in a k8s cluster.
+	Total int `json:"total"`
+	// The average age of active namespaces in a k8s cluster.
+	LifetimeAvg float64 `json:"lifetimeAvg"`
+	// The avg number of pods per namespace
+	PodsAvg float64 `json:"podsAvg"`
+	// The avg number of jobs per namespace
+	JobsAvg float64 `json:"jobsAvg"`
+	// The avg number of services per namespace
+	ServiceAvg float64 `json:"servicesAvg"`
+	// The avg number of deployments per namespace
+	DeployAvg float64 `json:"deploymentsAvg"`
 }
 
 type Node struct {
