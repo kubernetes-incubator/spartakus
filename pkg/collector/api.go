@@ -23,7 +23,6 @@ import (
 	"net"
 	"net/http"
 	"strconv"
-	"time"
 
 	"github.com/gorilla/handlers"
 	"github.com/julienschmidt/httprouter"
@@ -89,7 +88,6 @@ func (s *APIServer) storeRecordHandler() httprouter.Handle {
 			writeError(w, http.StatusBadRequest, fmt.Errorf("failed to decode record: %v", err))
 			return
 		}
-		rec.Timestamp = strconv.FormatInt(time.Now().Unix(), 10)
 		s.logRecord(&rec)
 
 		if err := s.Database.Store(rec); err != nil {

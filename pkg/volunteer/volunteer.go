@@ -18,6 +18,7 @@ package volunteer
 
 import (
 	"fmt"
+	"strconv"
 	"time"
 
 	"github.com/kubernetes-incubator/spartakus/pkg/database"
@@ -104,6 +105,7 @@ func (v *volunteer) generateRecord() (report.Record, error) {
 
 	rec := report.Record{
 		Version:       version.VERSION,
+		Timestamp:     strconv.FormatInt(time.Now().Unix(), 10),
 		ClusterID:     v.clusterID,
 		MasterVersion: &svrVer,
 		Nodes:         nodes,
