@@ -54,6 +54,9 @@ type Node struct {
 	ContainerRuntimeVersion *string `json:"containerRuntimeVersion,omitempty"`
 	// KubeletVersion is the value reported by kubernetes in the node status.
 	KubeletVersion *string `json:"kubeletVersion,omitempty"`
+	// CloudProvider is the <ProviderName> portion of the ProviderID reported
+	// by kubernetes in the node spec.
+	CloudProvider *string `json:"cloudProvider,omitempty"`
 	// Capacity is a list of resources and their associated values as reported
 	// by kubernetes in the node status.
 	Capacity []Resource `json:"capacity,omitempty"`

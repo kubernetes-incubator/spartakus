@@ -20,6 +20,7 @@ import (
 	"crypto/md5"
 	"encoding/hex"
 	"sort"
+	"strings"
 
 	"github.com/kubernetes-incubator/spartakus/pkg/report"
 	kclient "k8s.io/client-go/1.4/kubernetes"
@@ -45,6 +46,7 @@ func nodeFromKubeNode(kn *kv1.Node) report.Node {
 		Architecture:            strPtr(kn.Status.NodeInfo.Architecture),
 		ContainerRuntimeVersion: strPtr(kn.Status.NodeInfo.ContainerRuntimeVersion),
 		KubeletVersion:          strPtr(kn.Status.NodeInfo.KubeletVersion),
+		CloudProvider:           strPtr(providerName(kn.Spec.ProviderID)),
 	}
 	// We want to iterate the resources in a deterministic order.
 	keys := []string{}
@@ -83,6 +85,18 @@ func strPtr(str string) *string {
 	p := new(string)
 	*p = str
 	return p
+}
+
+// providerName extracts the cloud provider name from a given
+// string that should match: <ProviderName>://<ProviderSpecficNodeID>
+// (see https://github.com/kubernetes/client-go/blob/v1.4.0/1.4/pkg/api/v1/types.go#L2446).
+// If the given string does not match this format, we return "unknown".
+func providerName(providerID string) string {
+	parts := strings.Split(providerID, "://")
+	if len(parts) != 2 {
+		return "unknown"
+	}
+	return parts[0]
 }
 
 func newKubeClientWrapper() (*kubeClientWrapper, error) {
