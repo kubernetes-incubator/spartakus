@@ -37,7 +37,9 @@ func TestNodeFromKubeNode(t *testing.T) {
 					Name: "kname",
 				},
 			},
-			expect: report.Node{},
+			expect: report.Node{
+				CloudProvider: strPtr("unknown"),
+			},
 		},
 		{
 			input: kv1.Node{
@@ -59,6 +61,7 @@ func TestNodeFromKubeNode(t *testing.T) {
 					{Resource: "r2", Value: "200"},
 					{Resource: "r3", Value: "300"},
 				},
+				CloudProvider: strPtr("unknown"),
 			},
 		},
 		{
@@ -84,6 +87,7 @@ func TestNodeFromKubeNode(t *testing.T) {
 				Architecture:            strPtr("architecture"),
 				ContainerRuntimeVersion: strPtr("runtime"),
 				KubeletVersion:          strPtr("kubelet"),
+				CloudProvider:           strPtr("unknown"),
 			},
 		},
 	}
